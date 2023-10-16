@@ -14,6 +14,7 @@ class UserController extends Controller
     //const ADMIN = 'admin';
     public function createUser()
     {
+        
         return view('user.user-register');
     }
     public function storeUser(UserRegistrationRequest $request)
@@ -29,35 +30,28 @@ class UserController extends Controller
         return redirect()->route('login')->with('successMessage', 'Registration successful!');
     }
 
-    public function login()
+    public function userIndex()
     {
-        return view('user.login');
+        $user = User::all();
+        return view('admin.user-index', ['users' => $user]);
     }
 
-    public function postLogin(Request $request)
+    public function destroy($id)
     {
-        $request->validate([
-            'email' => 'required',
-            'password' => 'required',
-        ]);
+        $user = User::find($id);
 
-        $credentials = $request->only('email', 'password');
-
-        // Authenticate using the 'web' guard
-        if (Auth::guard('web')->attempt($credentials)) {
-            return redirect()->route('dashboard');
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found.'], 404);
         }
-        // Authenticate using the 'web' guard
-        if (Auth::guard('admin')->attempt($credentials)) {
-            return redirect()->route('dashboardadmin');
-        }
-        return "Wrong Username or Password!!";
+
+        // Check if the logged-in user has permission to delete the user.
+        // Implement your permission logic here.
+
+        // Delete the user
+        $user->delete();
+
+        return response()->json(['success' => true, 'message' => 'User deleted successfully.']);
     }
 
-    public function logout()
-    {
-        Auth::guard('web')->logout(); // Logout using the 'admin' guard
-        return redirect()->route('login');
-    }
 
 }

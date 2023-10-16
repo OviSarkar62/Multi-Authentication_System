@@ -14,10 +14,21 @@ class AdminController extends Controller
 
     public function createAdmin()
     {
+
+        $adminRegistered = Admin::where('user_type', self::ADMIN)->exists();
+
+        if ($adminRegistered) {
+            return redirect()->route('login')->with('errorMessage', 'An admin is already registered. You cannot register another admin.');
+        }
+
         return view('admin.admin-register');
     }
+
+
+
     public function storeAdmin(UserRegistrationRequest $request)
     {
+
         $user = Admin::create([
             'name' => request('name'),
             'email' => request('email'),
@@ -27,13 +38,4 @@ class AdminController extends Controller
 
         return redirect()->route('login')->with('successMessage', 'Registration successful!');
     }
-
-    public function logout()
-    {
-        auth()->guard('web')->logout(); // Logout using the 'web' guard
-        auth()->guard('admin')->logout(); // Logout using the 'admin' guard
-
-        return redirect()->route('login');
-    }
-
 }
